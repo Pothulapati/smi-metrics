@@ -1,7 +1,8 @@
 package metrics
 
 var (
-	resourceQueries = map[string]string{
+	/*
+	resourceQueriess = map[string]string{
 		"p99_response_latency": `histogram_quantile(
 			0.99,
 			sum(
@@ -73,7 +74,7 @@ var (
 		)`,
 	}
 
-	edgeQueries = map[string]string{
+	edgeQueriess = map[string]string{
 		"p99_response_latency": `histogram_quantile(
 			0.99,
 			sum(
@@ -159,4 +160,5 @@ var (
 			dst_namespace
 		)`,
 	}
+	*/
 )

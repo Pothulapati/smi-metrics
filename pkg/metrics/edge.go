@@ -17,6 +17,7 @@ type edgeLookup struct {
 	Item     *metrics.TrafficMetricsList
 	interval *metrics.Interval
 	details  *resourceDetails
+	queries map[string]string
 }
 
 func (e *edgeLookup) Get(labels model.Metric) *metrics.TrafficMetrics {
@@ -48,6 +49,7 @@ func (e *edgeLookup) Get(labels model.Metric) *metrics.TrafficMetrics {
 				Kind: e.Item.Resource.Kind,
 				Name: string(labels[src]),
 			},
+
 		}
 
 		if e.details.Namespaced {
@@ -69,7 +71,7 @@ func (e *edgeLookup) Get(labels model.Metric) *metrics.TrafficMetrics {
 
 func (e *edgeLookup) Queries() []*prometheus.Query {
 	queries := []*prometheus.Query{}
-	for name, tmpl := range edgeQueries {
+	for name, tmpl := range e.queries {
 		queries = append(queries, &prometheus.Query{
 			Name:     name,
 			Template: tmpl,
@@ -81,7 +83,7 @@ func (e *edgeLookup) Queries() []*prometheus.Query {
 		})
 	}
 
-	for name, tmpl := range edgeQueries {
+	for name, tmpl := range e.queries {
 		queries = append(queries, &prometheus.Query{
 			Name:     name,
 			Template: tmpl,
@@ -114,7 +116,9 @@ func (h *Handler) edges(w http.ResponseWriter, r *http.Request) {
 		}, true),
 		details:  details,
 		interval: interval,
+		queries: h.edgeQueries,
 	}
+
 
 	if err := prometheus.NewClient(r.Context(), h.client, interval).Update(
 		lookup); err != nil {
