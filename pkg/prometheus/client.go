@@ -68,7 +68,7 @@ func (c *Client) Execute(
 	}
 
 	log.WithFields(log.Fields{
-		"query": query,
+		"queryy": query,
 	}).Debug("querying prometheus")
 
 	result, err := c.client.Query(c.ctx, query, c.interval.Timestamp.Time)
