@@ -24,9 +24,11 @@ jobs:
   release:
     docker:
       - image: circleci/golang:1.12
-
+    working_directory: /go/src/github.com/deislabs/smi-metrics
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run: go get -u github.com/mitchellh/gox
       - run: go get -u github.com/tcnksm/ghr
       - run: go get -u github.com/stevenmatthewt/semantics
@@ -37,17 +39,18 @@ jobs:
             VER="17.03.0-ce"
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            mv /tmp/docker/* /usr/bin
+            sudo mv /tmp/docker/* /usr/bin
       - run:
           name: cross compiling
-            command: |
-              gox -os="linux darwin windows" -arch="amd64" -output="dist/smi_metrics_{{.OS}}_{{.Arch}}"
-              cd dist/ && gzip *
+          command: |
+            env GO111MODULE=on go mod vendor
+            gox -os="linux darwin windows" -arch="amd64" -output="dist/smi_metrics_{{.OS}}_{{.Arch}}" ./cmd/smi-metrics
+            cd dist/ && gzip *
       - run:
           name: docker build
-            command: |
-              docker build -t  deislabs/smi-metrics .
-      - run: add_ssh_keys
+          command: |
+            docker build -t  deislabs/smi-metrics .
+      - add_ssh_keys
       - run:
           name: pushing docker image and creating github release
           command: |
@@ -70,4 +73,4 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: release
