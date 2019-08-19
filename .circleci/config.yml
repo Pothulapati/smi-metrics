@@ -28,47 +28,40 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
       - run: go get -u github.com/mitchellh/gox
       - run: go get -u github.com/tcnksm/ghr
       - run: go get -u github.com/stevenmatthewt/semantics
       - run:
-          name: Install Docker client
+          name: docker build & push
           command: |
-            set -x
-            VER="17.03.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            sudo mv /tmp/docker/* /usr/bin
-      - run:
-          name: cross compiling
-          command: |
-            env GO111MODULE=on go mod vendor
-            gox -os="linux darwin windows" -arch="amd64" -output="dist/smi_metrics_{{.OS}}_{{.Arch}}" ./cmd/smi-metrics
-            cd dist/ && gzip *
-      - run:
-          name: docker build
-          command: |
-            docker build -t  deislabs/smi-metrics .
-      - add_ssh_keys
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            make push
+      - add_ssh_keys:
+          fingerprints:
+            - "b1:b2:ec:ca:62:80:ec:5b:5c:cd:0c:de:ba:91:fc:bf"
       - run:
           name: pushing docker image and creating github release
           command: |
             tag=$(semantics --output-tag)
-            if [ "$tag" ]; then
-              docker tag deislabs/smi-metrics deislabs/smi-metrics:$tag
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push deislabs/smi-metrics:$tag
-              ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace $tag dist/
+            if [ $tag ]; then
+              COMMIT=$(echo $CIRCLE_SHA1 | cut -c -7)
+              docker tag tarunpothulapati/smi-metrics:$COMMIT tarunpothulapati/smi-metrics:$tag
+              docker push tarunpothulapati/smi-metrics:$tag
+              env GO111MODULE=on make vendor
+              make binaries
+              cd dist/ && gzip *
+              ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace $tag ./
             else
               echo "The commit message(s) did not indicate a major/minor/patch version."
             fi
+
 workflows:
   version: 2
   build-workflow:
     jobs:
       - build
       - release:
+          context: DOCKER_USER
           requires:
             - build
           filters:
