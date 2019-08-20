@@ -99,7 +99,7 @@ func cmdFlags(flags *pflag.FlagSet) error {
 	flags.String(
 		"tls-cert-file",
 		"/var/run/smi-metrics/tls.crt",
-		"TLS certificate to use",
+		"TLS certificate to use.",
 	)
 	if err := bindFlag(flags.Lookup("tls-cert-file")); err != nil {
 		return err
