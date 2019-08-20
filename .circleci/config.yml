@@ -44,8 +44,8 @@ jobs:
           command: |
             tag=$(semantics --output-tag)
             if [ $tag ]; then
-              COMMIT=$(echo $CIRCLE_SHA1 | cut -c -7)
-              docker tag tarunpothulapati/smi-metrics:$COMMIT tarunpothulapati/smi-metrics:$tag
+              commit_tag=$(echo $CIRCLE_SHA1 | cut -c -7)
+              docker tag tarunpothulapati/smi-metrics:commit_tag tarunpothulapati/smi-metrics:$tag
               docker push tarunpothulapati/smi-metrics:$tag
               env GO111MODULE=on make vendor
               make binaries
