@@ -1,10 +1,10 @@
-version: 2 
+version: 2
 jobs:
-  build: 
-    docker: 
+  build:
+    docker:
       - image: circleci/golang:1.12
 
-    steps: 
+    steps:
       - checkout
       - restore_cache:
           keys:
@@ -28,25 +28,28 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
+          docker_layer_caching: true
       - run: go get -u github.com/mitchellh/gox
       - run: go get -u github.com/tcnksm/ghr
       - run: go get -u github.com/stevenmatthewt/semantics
       - run:
-          name: docker build & push
+          name: Docker build and push
           command: |
+            COMMIT_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)
+            echo 'export COMMIT_TAG="$(echo $CIRCLE_SHA1 | cut -c -7)"' >> $BASH_ENV
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            make push
+            env IMAGE=tarunpothulapati/smi-metrics TAG=$COMMIT_TAG make push
       - add_ssh_keys:
           fingerprints:
             - "b1:b2:ec:ca:62:80:ec:5b:5c:cd:0c:de:ba:91:fc:bf"
       - run:
-          name: pushing docker image and creating github release
+          name: Checking if the commit is a release
           command: |
+            set +e
             tag=$(semantics --output-tag)
-            if [ $tag ]; then
-              commit_tag=$(echo $CIRCLE_SHA1 | cut -c -7)
-              docker tag tarunpothulapati/smi-metrics:commit_tag tarunpothulapati/smi-metrics:$tag
-              docker push tarunpothulapati/smi-metrics:$tag
+            if [ $? -eq 0 ]; then
+              docker tag $REGISTRY_HOST/smi-metrics:COMMIT_TAG $REGISTRY_HOST/smi-metrics:$tag
+              docker push $REGISTRY_HOST/smi-metrics:$tag
               env GO111MODULE=on make vendor
               make binaries
               cd dist/ && gzip *
@@ -61,7 +64,7 @@ workflows:
     jobs:
       - build
       - release:
-          context: DOCKER_USER
+          context: release-context
           requires:
             - build
           filters:

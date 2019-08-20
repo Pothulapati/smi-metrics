@@ -2,9 +2,13 @@ ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 HAS_TILT := $(shell command -v tilt;)
 
-TAG := $(shell git log -n1 --pretty='%h')
+ifeq ($(TAG),)
+TAG := $(shell git describe --exact-match --tags $(git log -n1 --pretty='%h'))
+endif
 
-IMAGE := tarunpothulapati/smi-metrics
+ifeq ($(IMAGE),)
+IMAGE := thomasr/smi-metrics
+endif
 
 .PHONY: bootstrap
 bootstrap:
