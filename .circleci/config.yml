@@ -35,14 +35,14 @@ jobs:
             COMMIT_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)
             echo 'export COMMIT_TAG="$(echo $CIRCLE_SHA1 | cut -c -7)"' >> $BASH_ENV
             docker login docker.pkg.github.com -u $GITHUB_USER -p $GITHUB_TOKEN
-            env IMAGE=docker.pkg.github.com/$GITHUB_USER/smi-metrics TAG=$COMMIT_TAG make push
+            env IMAGE=docker.pkg.github.com/$GITHUB_USER/smi-metrics/smi-metrics TAG=$COMMIT_TAG make push
       - add_ssh_keys:
           fingerprints:
             - "b1:b2:ec:ca:62:80:ec:5b:5c:cd:0c:de:ba:91:fc:bf"
       - run:
           name: Checking if the commit is a release
           command: |
-           env IMAGE=docker.pkg.github.com/$GITHUB_USER/smi-metrics make release
+           env IMAGE=docker.pkg.github.com/$GITHUB_USER/smi-metrics/smi-metrics make release
 
 
 workflows:
