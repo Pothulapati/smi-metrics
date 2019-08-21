@@ -45,18 +45,8 @@ jobs:
       - run:
           name: Checking if the commit is a release
           command: |
-            set +e
-            tag=$(semantics --output-tag)
-            if [ $? -eq 0 ]; then
-              docker tag $REGISTRY_HOST/smi-metrics:COMMIT_TAG $REGISTRY_HOST/smi-metrics:$tag
-              docker push $REGISTRY_HOST/smi-metrics:$tag
-              env GO111MODULE=on make vendor
-              make binaries
-              cd dist/ && gzip *
-              ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace $tag ./
-            else
-              echo "The commit message(s) did not indicate a major/minor/patch version."
-            fi
+            make release
+
 
 workflows:
   version: 2
