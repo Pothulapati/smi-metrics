@@ -65,9 +65,9 @@ release: release-bootstrap
     $(eval RELEASE_TAG=$(shell semantics --output-tag))
 	@if [ $(RELEASE_TAG) ]; then \
 	  echo "Tagging the latest commit image with tag: ${RELEASE_TAG}"; \
-	  docker tag ${REGISTRY_HOST}/smi-metrics:${COMMIT_TAG} ${REGISTRY_HOST}/smi-metrics:${RELEASE_TAG}; \
-	  echo "Pusing the docker image: ${REGISTRY_HOST}/smi-metrics:${RELEASE_TAG} "; \
-	  docker push ${REGISTRY_HOST}/smi-metrics:${RELEASE_TAG}; \
+	  docker tag ${IMAGE}:${COMMIT_TAG} ${IMAGE}:${RELEASE_TAG}; \
+	  echo "Pusing the docker image: ${IMAGE}:${RELEASE_TAG} "; \
+	  docker push ${IMAGE}:${RELEASE_TAG}; \
 	  echo "Generating binaries for Github Release"; \
 	  env GO111MODULE=on make vendor; \
 	  make binaries; \
