@@ -48,6 +48,8 @@ jobs:
         go-version: 1.14
     - name: Build Chart
       run: |
+        export RELEASE_VERSION=${GITHUB_REF/refs\/tags\//}
+        export GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         make build-chart
     - name: Docker Build and Push
       if: github.event_name == 'push'
