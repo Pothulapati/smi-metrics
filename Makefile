@@ -48,7 +48,7 @@ dep:
 	go mod download
 
 tmp:
-	mkdir tmp
+	mkdir tmp final
 
 .PHONY: build-chart
 build-chart: tmp release-bootstrap
@@ -61,7 +61,7 @@ endif
 	for fname in $$(grep -rnl '$*' tmp/smi-metrics); do \
 		sed -i.bak 's/VERSION/${RELEASE_VERSION}/g' $$fname; \
 	done
-	helm package tmp/smi-metrics -d tmp --save=false
+	helm package tmp/smi-metrics -d final --save=false
 
 .PHONY: dev
 dev: bootstrap
@@ -79,7 +79,7 @@ ifndef GITHUB_TOKEN
 endif
 	ghr -u servicemeshinterface \
 		${RELEASE_VERSION} \
-		tmp/smi-metrics-*
+		final/smi-metrics-*
 
 .PHONY: push
 push: build
