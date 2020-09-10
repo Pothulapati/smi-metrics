@@ -54,9 +54,10 @@ jobs:
         export PATH=${PATH}:`go env GOPATH`/bin
         make build-chart
     - name: Publish Helm chart
+      if: github.event_name == 'push'
       uses: stefanprodan/helm-gh-pages@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        charts_dir: tmp/smi-metrics
+        charts_dir: chart
         branch: gh-pages
         
