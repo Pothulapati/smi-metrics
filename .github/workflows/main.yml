@@ -58,6 +58,6 @@ jobs:
       uses: stefanprodan/helm-gh-pages@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        charts_dir: chart
+        charts_dir: tmp/smi-metrics
         branch: gh-pages
         
